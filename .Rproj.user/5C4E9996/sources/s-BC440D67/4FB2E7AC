@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1562392973240.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "4FB2E7AC",
+    "lastKnownWriteTime" : 1562392861,
+    "last_content_update" : 1562392861,
+    "path" : "E:/Google Sky/Lab/108 Project/blogdown/bookdown.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "6,0",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
