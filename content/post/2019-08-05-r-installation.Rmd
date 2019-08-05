@@ -1,0 +1,56 @@
+---
+title: R installation
+author: CW
+date: '2019-08-05'
+slug: r-installation
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    toc: true
+    toc_float: false
+    toc_depth: 4
+---
+
+
+紀錄今天所教學之新手安裝以及相關設定。
+
+# R install
+
+請先至這兩個網站下載檔案，並且安裝程式(全部都點**下一步**就行了，無須做任何的設定)
+
+R 3.6.1 下載 : [For Windows](https://cran.r-project.org/bin/windows/base/R-3.6.1-win.exe)
+
+R studio 下載 : [For Windows, Win7+](https://www.rstudio.com/products/rstudio/download/)
+
+**注意：** Rstudio僅支援英文路徑，倘若Windows使用者名稱設定成中文，則會無法開啟程式，請至這個[網站](https://github.com/wush978/DataScienceAndR/wiki/Windows%E4%B8%AD%E6%96%87%E4%BD%BF%E7%94%A8%E8%80%85%E8%88%87Rstudio%E7%9A%84%E7%92%B0%E5%A2%83%E8%AE%8A%E6%95%B8%E8%AA%BF%E6%A0%A1)參閱解決方法
+
+## 設定環境
+
+打開R-studio，一開始我們要設定使用者介面，使得操作環境更適合讀者閱讀，打開工具列Tool->Global Options...->Apperance->Editor theme:，這裡內建許多的佈景主題提供使用者選擇，本人推薦**Vibrant Ink**。(黑底愛好者，喜歡半夜打code...)
+
+![](Vibrant_ink.jpg)
+
+## 安裝Package
+
+上述僅完成最陽春的R安裝，目前你手中的R的功能非常的少，就好像一台普通的腳踏車，如果想要再載女生得再加裝**坐墊**(應該不會有人想單純裝火箭筒吧XD)，如果想要R再幫忙完成更多的事情，像是**匯入資料、整理表格、數據視覺化甚至可以寫部落格**，只要找到對應的package就能辦到。
+
+但是，對於一個剛入坑R的同學們，應該是連這些package的名稱都不知道吧。所幸，有一個包山包海的package很適合新手一次完成所有最基本功能安裝，這個就是**tidyverse**。
+
+第一步，在R-Studio右下角分頁開啟**Package**，這裡有眾多使用者已安裝之Package，打勾者則是目前正在運行的，反之則是需要使用`library()`指令開啟Package。點選**Install**開啟Package安裝介面。
+
+![](package_i.jpg)
+
+第二步，在Install介面裡，確認Install form參數指向R的Package資料庫**CRAN**，並在Package欄位中鍵入**tidyverse**，按下Install系統則會自動下載最新版本。
+
+**注意：**安裝時間較長，請耐心等候確認左下角之Consle介面出現`>`，才算是安裝完成。
+
+![](tidy.jpg)
+
+安裝完`tidyverse`後，可以執行下列程式碼確認是否有安裝成功，可以在Console看到對應的訊息。
+
+``` {r}
+library(tidyverse)
+```
+
+
