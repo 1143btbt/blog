@@ -25,7 +25,7 @@ R studio 下載 : [For Windows, Win7+](https://www.rstudio.com/products/rstudio/
 
 **注意：** Rstudio僅支援英文路徑，倘若Windows使用者名稱設定成中文，則會無法開啟程式，請至這個[網站](https://github.com/wush978/DataScienceAndR/wiki/Windows%E4%B8%AD%E6%96%87%E4%BD%BF%E7%94%A8%E8%80%85%E8%88%87Rstudio%E7%9A%84%E7%92%B0%E5%A2%83%E8%AE%8A%E6%95%B8%E8%AA%BF%E6%A0%A1)參閱解決方法
 
-## 設定環境
+## 設定環境(Environment)
 
 打開R-studio，一開始我們要設定使用者介面，使得操作環境更適合讀者閱讀，打開工具列Tool->Global Options...->Apperance->Editor theme:，這裡內建許多的佈景主題提供使用者選擇，本人推薦**Vibrant Ink**。(黑底愛好者，喜歡半夜打code...)
 
@@ -53,7 +53,7 @@ R studio 下載 : [For Windows, Win7+](https://www.rstudio.com/products/rstudio/
 library(tidyverse)
 ```
 
-## 路徑設定
+## 路徑設定(Path)
 
 學會安裝Package後，再來我們要設定R在讀取檔案所指定的根目錄，這個是奠定之後學習其他人之程式碼時，不可或缺的能力。
 首先我們之後會使用[SchlossLab](https://www.schlosslab.org/)為該實驗室新手所設計之R課程[minimalR](http://www.riffomonas.org/minimalR/)，這個課程的編排比較適合已經有一些程式語言底子的人且知道如何應用網路搜尋的方法解決自己的問題，對於新手來說許多東西要先知道，尤其是設置教材用的數據。
@@ -68,7 +68,7 @@ library(tidyverse)
 
 第五步:測試是否有成功，我們來執行一段[minimalR](http://www.riffomonas.org/minimalR/01_scatter_plots.html)上的程式碼。
 
-``` {r gg ,message= FALSE,warning= FALSE, fig.weiht = 4.5}
+``` {r gg ,message= FALSE,warning= FALSE, fig.width = 4 }
 library(tidyverse)
 library(readxl)
 
@@ -83,7 +83,7 @@ ggplot(metadata_pcoa, aes(x=axis1, y=axis2, color=dx)) +
 		breaks=c("normal", "adenoma", "cancer"),
 		labels=c("Normal", "Adenoma", "Cancer")) +
 	coord_fixed() +
-	labs(title="PCoA of ThetaYC Distances Between Stool Samples",
+	labs(title="PCoA of ThetaYC Distances Between \nStool Samples",
 		x="PCo Axis 1",
 		y="PCo Axis 2") +
 	theme_classic()
@@ -93,13 +93,16 @@ ggplot(metadata_pcoa, aes(x=axis1, y=axis2, color=dx)) +
 如果有看到圖就代表你成功了，如果沒有辦法成功，請在回去檢查是否有步驟做錯。
 
 
-# 自學R之方法
+# 自學R之方法(Self-Learning)
 
-恭喜你已經完成建置基礎R的使用環境了，並且也能夠使用其他人的程式碼進行學習，所有的學習一開始都是從模仿開始，參閱各種文獻並且直接學習別人的語法可以讓你迅速達到你的目的，但是新手必須要養成一個好習慣是，**一字不漏地閱讀且弄懂所有不熟的指令**，回頭看這段[程式碼](## 路徑設定)，中間到底有多少東西是你不懂的(除了前兩行其他應該都是新的XDD)
+
+恭喜你已經完成建置基礎R的使用環境了，並且也能夠使用其他人的程式碼進行學習，所有的學習一開始都是從模仿開始，參閱各種文獻並且直接學習別人的語法可以讓你迅速達到你的目的，但是新手必須要養成一個好習慣是，**一字不漏地閱讀且弄懂所有不熟的指令**，回頭看上一段程式碼，中間到底有多少東西是你不懂的(除了前兩行其他應該都是新的XDD)
 
 但如何自己學習這些指令呢?我們可以從指令的說明書中去學習相關參數或者請教估狗小姐。
 
-## 指令說明書
+
+## 指令說明書(R-document)
+
 
 打開指令說明書非常簡單，只要在你想了解的指令前面打上`?`或者使用`help()`指令即可以開啟，說明書會出現在右下角的Help分頁。
 
@@ -159,10 +162,30 @@ c(xm, mean(x, trim = 0.10))
 
 再來我們可以看到**Arguments**段落得知，這個指令有三種參數(Arguments)可以調整`mean(x, trim = 0, na.rm = FALSE, ...)`。其中x是沒有設定值，意思是在使用`mean()`這個指令必須輸入值在x的參數中，可以為數(numeric)或者邏輯(logical)的向量或者數據。我們可以通過閱讀說明書學習這些參數的使用，在不同的參數下所獲得的結果以及目的是不同的。
 
-如果想要更深入了解Function的內容，可以學習Datacamp的課程**Intermediate R** Chapt 3或者進階課程**Writing Functions in R**。
+如果想要更深入了解Function的內容，可以學習Datacamp的課程[Intermediate R](https://www.datacamp.com/courses/intermediate-r) Chapt 3或者進階課程[Writing Functions in R](https://www.datacamp.com/courses/writing-functions-in-r)。
 
 
 ## Datacamp開通帳號
 
+這裡提到如何使用Datacamp，我目前已在Datacamp中學習一整年，已經完成大約[30堂課](https://www.datacamp.com/profile/1143btbt)程以上，我個人認為這個網站學習R是非常有用的，當然Datacamp還是有些缺點，就是填空格的方式會時常讓人忘記學過的東西，必須要勤練習，甚至是要找ㄧ些project來操作才可能得心應手，至於專業的知識如統計的原理以及演算法等可以搭配edx或者Coursera這種開放課程平台來加強。
+
+不過好處是Datacamp可以讓你在短時間內摸到很多指令以及功能，並且這些練習過的程式碼都算是可以重複利用，並且有針對各種用途分類所需學習的package，比較好能夠設計自己的學習進度，以及之到學到甚麼程度算是入行。
+
+這個[網址](https://zhuanlan.zhihu.com/p/50665470)告訴你如何開啟兩個月的試用，請多加利用。
+
+
 ## Datacamp必修課程
+
+這裡安排一些課程給大家參考，可以按照優先度去選課程學習。其實Datacamp的課程package重複性很大，但是每堂課都有含括一點技巧，實際上這些就須要花時間跟練習去學習這些知識。如果想快點上手則可以從優先度`***`的課程開始進行。
+
+如果同學把這些三顆*的課程完成後，可以去minimalR上面學習一些與菌項分析相關實例，其中以[Session 8: Working with text data](http://www.riffomonas.org/minimalR/08_taxonomic_data.html)最為重要。
+
+```{r echo= FALSE}
+library(tidyverse)
+library(readxl)
+
+table <- read_excel(path="raw_data/0806.xlsx")
+knitr::kable(table)
+
+```
 

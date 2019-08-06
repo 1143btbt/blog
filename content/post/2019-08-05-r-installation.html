@@ -16,12 +16,12 @@ output:
 <div id="TOC">
 <ul>
 <li><a href="#r-install">R install</a><ul>
-<li><a>設定環境</a></li>
+<li><a href="#environment">設定環境(Environment)</a></li>
 <li><a href="#package">安裝Package</a></li>
-<li><a>路徑設定</a></li>
+<li><a href="#path">路徑設定(Path)</a></li>
 </ul></li>
-<li><a href="#r">自學R之方法</a><ul>
-<li><a>指令說明書</a></li>
+<li><a href="#rself-learning">自學R之方法(Self-Learning)</a><ul>
+<li><a href="#r-document">指令說明書(R-document)</a></li>
 <li><a href="#datacamp">Datacamp開通帳號</a></li>
 <li><a href="#datacamp">Datacamp必修課程</a></li>
 </ul></li>
@@ -35,8 +35,8 @@ output:
 <p>R 3.6.1 下載 : <a href="https://cran.r-project.org/bin/windows/base/R-3.6.1-win.exe">For Windows</a></p>
 <p>R studio 下載 : <a href="https://www.rstudio.com/products/rstudio/download/">For Windows, Win7+</a></p>
 <p><strong>注意：</strong> Rstudio僅支援英文路徑，倘若Windows使用者名稱設定成中文，則會無法開啟程式，請至這個<a href="https://github.com/wush978/DataScienceAndR/wiki/Windows%E4%B8%AD%E6%96%87%E4%BD%BF%E7%94%A8%E8%80%85%E8%88%87Rstudio%E7%9A%84%E7%92%B0%E5%A2%83%E8%AE%8A%E6%95%B8%E8%AA%BF%E6%A0%A1">網站</a>參閱解決方法</p>
-<div class="section level2">
-<h2>設定環境</h2>
+<div id="environment" class="section level2">
+<h2>設定環境(Environment)</h2>
 <p>打開R-studio，一開始我們要設定使用者介面，使得操作環境更適合讀者閱讀，打開工具列Tool-&gt;Global Options…-&gt;Apperance-&gt;Editor theme:，這裡內建許多的佈景主題提供使用者選擇，本人推薦<strong>Vibrant Ink</strong>。(黑底愛好者，喜歡半夜打code…)</p>
 <div class="figure">
 <img src="Vibrant_ink.jpg" />
@@ -60,17 +60,17 @@ output:
 </div>
 <p>安裝完<code>tidyverse</code>後，可以執行下列程式碼確認是否有安裝成功，可以在Console看到對應的訊息。</p>
 <pre class="r"><code>library(tidyverse)</code></pre>
-<pre><code>## -- Attaching packages -------------------------------------------------------------------------- tidyverse 1.2.1 --</code></pre>
-<pre><code>## √ ggplot2 3.1.0       √ purrr   0.3.2  
+<pre><code>## -- Attaching packages ----------------------------------------------------------------------------------------------------- tidyverse 1.2.1 --</code></pre>
+<pre><code>## √ ggplot2 3.1.0       √ purrr   0.2.5  
 ## √ tibble  2.1.1       √ dplyr   0.8.0.1
-## √ tidyr   0.8.3       √ stringr 1.3.1  
-## √ readr   1.3.1       √ forcats 0.4.0</code></pre>
-<pre><code>## -- Conflicts ----------------------------------------------------------------------------- tidyverse_conflicts() --
+## √ tidyr   0.8.1       √ stringr 1.3.1  
+## √ readr   1.1.1       √ forcats 0.4.0</code></pre>
+<pre><code>## -- Conflicts -------------------------------------------------------------------------------------------------------- tidyverse_conflicts() --
 ## x dplyr::filter() masks stats::filter()
 ## x dplyr::lag()    masks stats::lag()</code></pre>
 </div>
-<div class="section level2">
-<h2>路徑設定</h2>
+<div id="path" class="section level2">
+<h2>路徑設定(Path)</h2>
 <p>學會安裝Package後，再來我們要設定R在讀取檔案所指定的根目錄，這個是奠定之後學習其他人之程式碼時，不可或缺的能力。 首先我們之後會使用<a href="https://www.schlosslab.org/">SchlossLab</a>為該實驗室新手所設計之R課程<a href="http://www.riffomonas.org/minimalR/">minimalR</a>，這個課程的編排比較適合已經有一些程式語言底子的人且知道如何應用網路搜尋的方法解決自己的問題，對於新手來說許多東西要先知道，尤其是設置教材用的數據。</p>
 <p>第一步:從GitHub上下載教材數據<a href="https://github.com/riffomonas/raw_data/archive/0.1.zip">raw_data GitHub repository</a></p>
 <p>第二步:解壓縮這個壓縮檔，並將資料存在一個目錄下，這裡建議取名為<strong>minimalR</strong>。</p>
@@ -91,20 +91,20 @@ ggplot(metadata_pcoa, aes(x=axis1, y=axis2, color=dx)) +
         breaks=c(&quot;normal&quot;, &quot;adenoma&quot;, &quot;cancer&quot;),
         labels=c(&quot;Normal&quot;, &quot;Adenoma&quot;, &quot;Cancer&quot;)) +
     coord_fixed() +
-    labs(title=&quot;PCoA of ThetaYC Distances Between Stool Samples&quot;,
+    labs(title=&quot;PCoA of ThetaYC Distances Between \nStool Samples&quot;,
         x=&quot;PCo Axis 1&quot;,
         y=&quot;PCo Axis 2&quot;) +
     theme_classic()</code></pre>
-<p><img src="/post/2019-08-05-r-installation_files/figure-html/gg%20-1.png" width="672" /></p>
+<p><img src="/post/2019-08-05-r-installation_files/figure-html/gg%20-1.png" width="384" /></p>
 <p>如果有看到圖就代表你成功了，如果沒有辦法成功，請在回去檢查是否有步驟做錯。</p>
 </div>
 </div>
-<div id="r" class="section level1">
-<h1>自學R之方法</h1>
-<p>恭喜你已經完成建置基礎R的使用環境了，並且也能夠使用其他人的程式碼進行學習，所有的學習一開始都是從模仿開始，參閱各種文獻並且直接學習別人的語法可以讓你迅速達到你的目的，但是新手必須要養成一個好習慣是，<strong>一字不漏地閱讀且弄懂所有不熟的指令</strong>，回頭看這段<a href="##%20路徑設定">程式碼</a>，中間到底有多少東西是你不懂的(除了前兩行其他應該都是新的XDD)</p>
+<div id="rself-learning" class="section level1">
+<h1>自學R之方法(Self-Learning)</h1>
+<p>恭喜你已經完成建置基礎R的使用環境了，並且也能夠使用其他人的程式碼進行學習，所有的學習一開始都是從模仿開始，參閱各種文獻並且直接學習別人的語法可以讓你迅速達到你的目的，但是新手必須要養成一個好習慣是，<strong>一字不漏地閱讀且弄懂所有不熟的指令</strong>，回頭看上一段程式碼，中間到底有多少東西是你不懂的(除了前兩行其他應該都是新的XDD)</p>
 <p>但如何自己學習這些指令呢?我們可以從指令的說明書中去學習相關參數或者請教估狗小姐。</p>
-<div class="section level2">
-<h2>指令說明書</h2>
+<div id="r-document" class="section level2">
+<h2>指令說明書(R-document)</h2>
 <p>打開指令說明書非常簡單，只要在你想了解的指令前面打上<code>?</code>或者使用<code>help()</code>指令即可以開啟，說明書會出現在右下角的Help分頁。</p>
 <p>我們來看下面這個例子：</p>
 <pre class="r"><code>?mean</code></pre>
@@ -153,12 +153,108 @@ c(xm, mean(x, trim = 0.10))
 </code></pre>
 <p>第一行可以看到<code>mean {base}</code>，我們可以知道<code>mean</code>這個指令是出自於<code>base</code> package，這個是R的基礎運算功能。</p>
 <p>再來我們可以看到<strong>Arguments</strong>段落得知，這個指令有三種參數(Arguments)可以調整<code>mean(x, trim = 0, na.rm = FALSE, ...)</code>。其中x是沒有設定值，意思是在使用<code>mean()</code>這個指令必須輸入值在x的參數中，可以為數(numeric)或者邏輯(logical)的向量或者數據。我們可以通過閱讀說明書學習這些參數的使用，在不同的參數下所獲得的結果以及目的是不同的。</p>
-<p>如果想要更深入了解Function的內容，可以學習Datacamp的課程<strong>Intermediate R</strong> Chapt 3或者進階課程<strong>Writing Functions in R</strong>。</p>
+<p>如果想要更深入了解Function的內容，可以學習Datacamp的課程<a href="https://www.datacamp.com/courses/intermediate-r">Intermediate R</a> Chapt 3或者進階課程<a href="https://www.datacamp.com/courses/writing-functions-in-r">Writing Functions in R</a>。</p>
 </div>
 <div id="datacamp" class="section level2">
 <h2>Datacamp開通帳號</h2>
+<p>這裡提到如何使用Datacamp，我目前已在Datacamp中學習一整年，已經完成大約<a href="https://www.datacamp.com/profile/1143btbt">30堂課</a>程以上，我個人認為這個網站學習R是非常有用的，當然Datacamp還是有些缺點，就是填空格的方式會時常讓人忘記學過的東西，必須要勤練習，甚至是要找ㄧ些project來操作才可能得心應手，至於專業的知識如統計的原理以及演算法等可以搭配edx或者Coursera這種開放課程平台來加強。</p>
+<p>不過好處是Datacamp可以讓你在短時間內摸到很多指令以及功能，並且這些練習過的程式碼都算是可以重複利用，並且有針對各種用途分類所需學習的package，比較好能夠設計自己的學習進度，以及之到學到甚麼程度算是入行。</p>
+<p>這個<a href="https://zhuanlan.zhihu.com/p/50665470">網址</a>告訴你如何開啟兩個月的試用，請多加利用。</p>
 </div>
 <div id="datacamp" class="section level2">
 <h2>Datacamp必修課程</h2>
+<p>這裡安排一些課程給大家參考，可以按照優先度去選課程學習。其實Datacamp的課程package重複性很大，但是每堂課都有含括一點技巧，實際上這些就須要花時間跟練習去學習這些知識。如果想快點上手則可以從優先度<code>***</code>的課程開始進行。</p>
+<p>如果同學把這些三顆*的課程完成後，可以去minimalR上面學習一些與菌項分析相關實例，其中以<a href="http://www.riffomonas.org/minimalR/08_taxonomic_data.html">Session 8: Working with text data</a>最為重要。</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">學習package</th>
+<th align="left">Datacamp 課程</th>
+<th align="left">優先度</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">base</td>
+<td align="left"><a href="https://www.datacamp.com/courses/free-introduction-to-r">Introduction to R</a></td>
+<td align="left">***</td>
+</tr>
+<tr class="even">
+<td align="left">base</td>
+<td align="left"><a href="https://www.datacamp.com/courses/intermediate-r">Intermediate R</a></td>
+<td align="left">***</td>
+</tr>
+<tr class="odd">
+<td align="left">dplyr</td>
+<td align="left"><a href="https://www.datacamp.com/courses/dplyr-data-manipulation-r-tutorial">Data Manipulation in R with dplyr</a></td>
+<td align="left">***</td>
+</tr>
+<tr class="even">
+<td align="left">dplyr</td>
+<td align="left"><a href="https://www.datacamp.com/courses/joining-data-in-r-with-dplyr">Joining Data in R with dplyr</a></td>
+<td align="left">***</td>
+</tr>
+<tr class="odd">
+<td align="left">ggplot2</td>
+<td align="left"><a href="https://www.datacamp.com/courses/data-visualization-with-ggplot2-1">Data Visualization with ggplot2 (Part 1)</a></td>
+<td align="left">***</td>
+</tr>
+<tr class="even">
+<td align="left">dplyr/ggplot/rmarkdown</td>
+<td align="left"><a href="https://www.datacamp.com/courses/communicating-with-data-in-the-tidyverse">Communicating with Data in the Tidyverse</a></td>
+<td align="left">**</td>
+</tr>
+<tr class="odd">
+<td align="left">tidyverse</td>
+<td align="left"><a href="https://www.datacamp.com/courses/exploratory-data-analysis">Exploratory Data Analysis</a></td>
+<td align="left">**</td>
+</tr>
+<tr class="even">
+<td align="left">tidyverse</td>
+<td align="left"><a href="https://www.datacamp.com/courses/visualization-best-practices-in-r">Visualization Best Practices in R</a></td>
+<td align="left">**</td>
+</tr>
+<tr class="odd">
+<td align="left">dplyr</td>
+<td align="left"><a href="https://www.datacamp.com/courses/introduction-to-the-tidyverse">Introduction to the Tidyverse</a></td>
+<td align="left">*</td>
+</tr>
+<tr class="even">
+<td align="left">tidyverse</td>
+<td align="left"><a href="https://www.datacamp.com/courses/correlation-and-regression">Correlation and Regression</a></td>
+<td align="left">*</td>
+</tr>
+<tr class="odd">
+<td align="left">dist/hclust</td>
+<td align="left"><a href="https://www.datacamp.com/courses/cluster-analysis-in-r">Cluster Analysis in R</a></td>
+<td align="left">*</td>
+</tr>
+<tr class="even">
+<td align="left">readr/readxl/tibble</td>
+<td align="left"><a href="https://www.datacamp.com/courses/importing-data-in-r-part-1">Importing Data in R (Part 1)</a></td>
+<td align="left">*</td>
+</tr>
+<tr class="odd">
+<td align="left">readr/readxl/tibble</td>
+<td align="left"><a href="https://www.datacamp.com/courses/importing-data-in-r-part-2">Importing Data in R (Part 2)</a></td>
+<td align="left">*</td>
+</tr>
+<tr class="even">
+<td align="left">tidyverse</td>
+<td align="left"><a href="https://www.datacamp.com/courses/cleaning-data-in-r">Cleaning Data in R</a></td>
+<td align="left">*</td>
+</tr>
+<tr class="odd">
+<td align="left">tidyverse</td>
+<td align="left"><a href="https://www.datacamp.com/courses/introduction-to-data">Introduction to Data</a></td>
+<td align="left">*</td>
+</tr>
+<tr class="even">
+<td align="left">tidyverse</td>
+<td align="left"><a href="https://www.datacamp.com/courses/exploratory-data-analysis-in-r-case-study">Exploratory Data Analysis in R: Case Study</a></td>
+<td align="left">*</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
