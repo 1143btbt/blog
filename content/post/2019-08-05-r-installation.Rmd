@@ -33,7 +33,7 @@ R studio 下載 : [For Windows, Win7+](https://www.rstudio.com/products/rstudio/
 
 ## 安裝Package
 
-上述僅完成最陽春的R安裝，目前你手中的R的功能非常的少，就好像一台普通的腳踏車，如果想要再載女生得再加裝**坐墊**(應該不會有人想單純裝火箭筒吧XD)，如果想要R再幫忙完成更多的事情，像是**匯入資料、整理表格、數據視覺化甚至可以寫部落格**，只要找到對應的package就能辦到。
+上述僅完成最陽春的R安裝，目前你手中的R的功能非常的少，就好像一台普通的腳踏車，如果想要再載女生得再加裝**坐墊**(前提是歐爸的話XD)，如果想要R再幫忙完成更多的事情，像是**匯入資料、整理表格、數據視覺化甚至可以寫部落格**，只要找到對應的package就能辦到。
 
 但是，對於一個剛入坑R的同學們，應該是連這些package的名稱都不知道吧。所幸，有一個包山包海的package很適合新手一次完成所有最基本功能安裝，這個就是**tidyverse**。
 
@@ -49,8 +49,120 @@ R studio 下載 : [For Windows, Win7+](https://www.rstudio.com/products/rstudio/
 
 安裝完`tidyverse`後，可以執行下列程式碼確認是否有安裝成功，可以在Console看到對應的訊息。
 
-``` {r}
+``` {r, warning =FALSE}
 library(tidyverse)
 ```
 
+## 路徑設定
+
+學會安裝Package後，再來我們要設定R在讀取檔案所指定的根目錄，這個是奠定之後學習其他人之程式碼時，不可或缺的能力。
+首先我們之後會使用[SchlossLab](https://www.schlosslab.org/)為該實驗室新手所設計之R課程[minimalR](http://www.riffomonas.org/minimalR/)，這個課程的編排比較適合已經有一些程式語言底子的人且知道如何應用網路搜尋的方法解決自己的問題，對於新手來說許多東西要先知道，尤其是設置教材用的數據。
+
+第一步:從GitHub上下載教材數據[raw_data GitHub repository](https://github.com/riffomonas/raw_data/archive/0.1.zip)
+
+第二步:解壓縮這個壓縮檔，並將資料存在一個目錄下，這裡建議取名為**minimalR**。
+
+第三步:將解壓縮後的資料夾`raw_data-0.1`改名為`raw_data`。**提醒:在寫程式語言中，所有取名以及路徑名稱不要使用空白，盡量使用底線**
+
+第四步:回到R-Studio，使用快捷鍵**Ctrl+Shift+H**或者使用指令`setwd(你的資料夾路徑)`，去開啟minimalR的資料夾即可完成。
+
+第五步:測試是否有成功，我們來執行一段[minimalR](http://www.riffomonas.org/minimalR/01_scatter_plots.html)上的程式碼。
+
+``` {r gg ,message= FALSE,warning= FALSE, fig.weiht = 4.5}
+library(tidyverse)
+library(readxl)
+
+pcoa <- read_tsv(file="raw_data/baxter.thetayc.pcoa.axes")
+metadata <- read_excel(path="raw_data/baxter.metadata.xlsx")
+metadata_pcoa <- inner_join(metadata, pcoa, by=c('sample'='group'))
+
+ggplot(metadata_pcoa, aes(x=axis1, y=axis2, color=dx)) +
+	geom_point(shape=19, size=2) +
+	scale_color_manual(name=NULL,
+		values=c("blue", "red", "black"),
+		breaks=c("normal", "adenoma", "cancer"),
+		labels=c("Normal", "Adenoma", "Cancer")) +
+	coord_fixed() +
+	labs(title="PCoA of ThetaYC Distances Between Stool Samples",
+		x="PCo Axis 1",
+		y="PCo Axis 2") +
+	theme_classic()
+
+```
+
+如果有看到圖就代表你成功了，如果沒有辦法成功，請在回去檢查是否有步驟做錯。
+
+
+# 自學R之方法
+
+恭喜你已經完成建置基礎R的使用環境了，並且也能夠使用其他人的程式碼進行學習，所有的學習一開始都是從模仿開始，參閱各種文獻並且直接學習別人的語法可以讓你迅速達到你的目的，但是新手必須要養成一個好習慣是，**一字不漏地閱讀且弄懂所有不熟的指令**，回頭看這段[程式碼](## 路徑設定)，中間到底有多少東西是你不懂的(除了前兩行其他應該都是新的XDD)
+
+但如何自己學習這些指令呢?我們可以從指令的說明書中去學習相關參數或者請教估狗小姐。
+
+## 指令說明書
+
+打開指令說明書非常簡單，只要在你想了解的指令前面打上`?`或者使用`help()`指令即可以開啟，說明書會出現在右下角的Help分頁。
+
+我們來看下面這個例子：
+
+``` {r ,eval=FALSE}
+?mean
+```
+
+```
+mean {base}	R Documentation
+Arithmetic Mean
+
+Description
+
+Generic function for the (trimmed) arithmetic mean.
+
+Usage
+
+mean(x, ...)
+
+## Default S3 method:
+mean(x, trim = 0, na.rm = FALSE, ...)
+Arguments
+
+x	
+An R object. Currently there are methods for numeric/logical vectors and date, date-time and time interval objects. Complex vectors are allowed for trim = 0, only.
+trim	
+the fraction (0 to 0.5) of observations to be trimmed from each end of x before the mean is computed. Values of trim outside that range are taken as the nearest endpoint.
+na.rm	
+a logical value indicating whether NA values should be stripped before the computation proceeds.
+...	
+further arguments passed to or from other methods.
+Value
+
+If trim is zero (the default), the arithmetic mean of the values in x is computed, as a numeric or complex vector of length one. If x is not logical (coerced to numeric), numeric (including integer) or complex, NA_real_ is returned, with a warning.
+
+If trim is non-zero, a symmetrically trimmed mean is computed with a fraction of trim observations deleted from each end before the mean is computed.
+
+References
+
+Becker, R. A., Chambers, J. M. and Wilks, A. R. (1988) The New S Language. Wadsworth & Brooks/Cole.
+
+See Also
+
+weighted.mean, mean.POSIXct, colMeans for row and column means.
+
+Examples
+
+x <- c(0:10, 50)
+xm <- mean(x)
+c(xm, mean(x, trim = 0.10))
+
+```
+
+第一行可以看到`mean {base}`，我們可以知道`mean`這個指令是出自於`base` package，這個是R的基礎運算功能。
+
+再來我們可以看到**Arguments**段落得知，這個指令有三種參數(Arguments)可以調整`mean(x, trim = 0, na.rm = FALSE, ...)`。其中x是沒有設定值，意思是在使用`mean()`這個指令必須輸入值在x的參數中，可以為數(numeric)或者邏輯(logical)的向量或者數據。我們可以通過閱讀說明書學習這些參數的使用，在不同的參數下所獲得的結果以及目的是不同的。
+
+如果想要更深入了解Function的內容，可以學習Datacamp的課程**Intermediate R** Chapt 3或者進階課程**Writing Functions in R**。
+
+
+## Datacamp開通帳號
+
+## Datacamp必修課程
 

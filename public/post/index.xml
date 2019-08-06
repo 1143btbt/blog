@@ -17,19 +17,19 @@
       <pubDate>Mon, 05 Aug 2019 00:00:00 +0000</pubDate>
       
       <guid>/2019/08/05/r-installation/</guid>
-      <description>R install設定環境安裝Package紀錄今天所教學之新手安裝以及相關設定。
+      <description>R install設定環境安裝Package路徑設定自學R之方法指令說明書Datacamp開通帳號Datacamp必修課程紀錄今天所教學之新手安裝以及相關設定。
 R install請先至這兩個網站下載檔案，並且安裝程式(全部都點下一步就行了，無須做任何的設定)
 R 3.6.1 下載 : For Windows
 R studio 下載 : For Windows, Win7+
 注意： Rstudio僅支援英文路徑，倘若Windows使用者名稱設定成中文，則會無法開啟程式，請至這個網站參閱解決方法
 設定環境打開R-studio，一開始我們要設定使用者介面，使得操作環境更適合讀者閱讀，打開工具列Tool-&amp;gt;Global Options…-&amp;gt;Apperance-&amp;gt;Editor theme:，這裡內建許多的佈景主題提供使用者選擇，本人推薦Vibrant Ink。(黑底愛好者，喜歡半夜打code…)
-安裝Package上述僅完成最陽春的R安裝，目前你手中的R的功能非常的少，就好像一台普通的腳踏車，如果想要再載女生得再加裝坐墊(應該不會有人想單純裝火箭筒吧XD)，如果想要R再幫忙完成更多的事情，像是匯入資料、整理表格、數據視覺化甚至可以寫部落格，只要找到對應的package就能辦到。
+安裝Package上述僅完成最陽春的R安裝，目前你手中的R的功能非常的少，就好像一台普通的腳踏車，如果想要再載女生得再加裝坐墊(前提是歐爸的話XD)，如果想要R再幫忙完成更多的事情，像是匯入資料、整理表格、數據視覺化甚至可以寫部落格，只要找到對應的package就能辦到。
 但是，對於一個剛入坑R的同學們，應該是連這些package的名稱都不知道吧。所幸，有一個包山包海的package很適合新手一次完成所有最基本功能安裝，這個就是tidyverse。
 第一步，在R-Studio右下角分頁開啟Package，這裡有眾多使用者已安裝之Package，打勾者則是目前正在運行的，反之則是需要使用library()指令開啟Package。點選Install開啟Package安裝介面。
 第二步，在Install介面裡，確認Install form參數指向R的Package資料庫CRAN，並在Package欄位中鍵入tidyverse，按下Install系統則會自動下載最新版本。
 注意：安裝時間較長，請耐心等候確認左下角之Consle介面出現&amp;gt;，才算是安裝完成。
 安裝完tidyverse後，可以執行下列程式碼確認是否有安裝成功，可以在Console看到對應的訊息。
-library(tidyverse)## Warning: package &amp;#39;tidyverse&amp;#39; was built under R version 3.5.3## -- Attaching packages ----------------------------------------------------------------------------------------------------- tidyverse 1.2.1 --## √ ggplot2 3.1.0 √ purrr 0.</description>
+library(tidyverse)## -- Attaching packages -------------------------------------------------------------------------- tidyverse 1.2.1 --## √ ggplot2 3.1.0 √ purrr 0.3.2 ## √ tibble 2.</description>
     </item>
     
     <item>
