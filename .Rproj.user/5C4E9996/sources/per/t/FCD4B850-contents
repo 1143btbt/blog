@@ -1,0 +1,8 @@
+install.packages("blogdown")
+blogdown::install_hugo()
+library(blogdown)
+new_site()
+new_post()
+serve_site()
+
+
