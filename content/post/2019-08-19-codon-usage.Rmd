@@ -1,0 +1,151 @@
+---
+title: Codon Usage
+author: Che-Wei
+date: '2019-08-19'
+slug: codon-usage
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    toc: true
+    toc_float: false
+    toc_depth: 4
+---
+當我們完成Datacamp課程[Data Manipulation in R with dplyr](https://campus.datacamp.com/courses/dplyr-data-manipulation-r-tutorial/chapter-one-introduction-to-dplyr-and-tbls?ex=1)或者[Communicating with Data in the Tidyverse](https://www.datacamp.com/courses/communicating-with-data-in-the-tidyverse)，你應該已經熟悉使用**Tidyverse**的語法了，我們就來進行實作練習。
+
+# Codon Usage of *Pseudomonas A46*
+
+細菌是我們最常使用的生物宿主(Host)，但是我們對於細菌的掌握大多只限於幾隻strain，如*Escherichia coli*、*Saccharomyces cerevisiae*，如果今天要使用細菌作為蛋白質表現(Express)之工具，我們必須熟知**質體學、微生物學以及分子生物**，少了任何一個環節你沒有弄清楚，實驗注定會失敗。
+
+今天我們就以**重組蛋白(Fusion-Protein)**為例子，今天剛好我們從野外的汙染土壤中，篩選出一隻對重金屬抗性很強的細菌，經過鑑定以及次世代定序(NGS)，我們得知這株菌為***Pseudomonas* sp. A46**，並且我們擁有其部分基因體([Draft Genome](https://www.ncbi.nlm.nih.gov/nuccore/NBMS00000000))。
+
+擁有以上資訊後，我們試圖將外源基因轉殖至本株菌中，首先我們已經建構好可以在這株菌的**穿梭載體(Shutle Vector)**，包含了大腸桿菌的ori(pUC)以及*P.* A46的ori(pRO16000)，以及確認可以表現出蛋白質之啟動子(Promotor, [ J23100](http://parts.igem.org/Part:BBa_J23100))，外源基因也找好了，但是我們遇到一個問題，那就是當我們要預先設計序列以及確認蛋白質是否適合於這株菌做表現，我們沒有這株菌的**Codon Usage Frequence**。
+
+# Codon Usage Frequence
+
+每一株菌都有其不同的密碼子使用，目前日本有一個[Codon Usage Database](https://www.kazusa.or.jp/codon/)，這裡面登入了許多菌種的**Codon Usage Table**，但是值得注意的是，每隻菌種使用的CDS數去統計密碼子的使用頻率都不一樣，有的甚至只有適用1條基因就建檔了，結果是難以被相信的。
+
+幸好我們已經有這株菌的基因體序列，在基因體中我們有5964個Open Reading Frame(ORF)預測可以表現成蛋白質，於是乎我們可以將這些序列用來統計**Codon Usage Frequence**。
+
+首先我們先看一下這株菌的ORF FASTA檔案：
+
+```{r, echo=FALSE, message=FALSE, hide= TRUE, warning=FALSE}
+library(tidyverse)
+```
+
+```
+>PSDM_0001 GTGAGCGCGCCCGGCGGCGTGGACAGCGGCCTGCTGGATTCGCTGACGGGCAACAGGATCTACCTGTTCCTGCAGGGAGGCGCGGTGGTCGGGCGCGTGGGTACCGCGGGTGGCCTGGCCGATGCCGGGGGCGCCCAGTCGTTCATGATCAGCGTGGTTGCCAGCAGCGGTCTCGTGAGCCTGAGCCAGAGCCGTTCGATCATCCATGACGATCCGCTGGACCCCTTCGAGACGGGGGCTTCCGCCGCTGGACTGGCGGCGAGCCTGGTGACCCTGACGGCGACCATCACCGACGGCGATGGCGACACGGCTTCGGCCACCCGCGAGATCGGCGGCGCATTCAAGTTCGAGGACGACGGTCCTGCGCTCGCCTTCGGCAACCTCGTCGGGACGGGCAGCATCCTGCCGCAGTACGGCTTCTGGAGCATGGATCCGGGCACCGATGGCCTGGGGGCGGCCGGGCTGGACATCAGCCTGGTGGGCGGTGAGTTCACCCTGGTCAGGCCGGATGGCACCACCACCACGGGCACCGGTACGCTCACCGAGCAGTCGCCTTCGCCGGATGGCAATGGCGCCTATCGTTTCGCCGGCACCCTTACGGGGGACTTCGACAATAACGCCTCCACGGCGGACACCAGCATCGACTACAGCCTCACCGCCTTCGCCGACGGCACCTATGCACTGGACCTGGTGCAGGGGGTCAGCTCGACGATAGTGCGCAGCAGCGCCGACGGCGCCCTGGATGCCGGAGGCCCGGACCCCGTGCGGACCTTGCTGATTCCGGAGCAGGATCCGCCGACCATTCCGTCGCCGTCCGAGGAGATCGTGTTCTTCGGCGTCAATGCGACCACCAGCGCCGCTGACATCTTCACGGCCATCGGGCCCGGGGAGCCGGACCTCACCGAAGCCCAGGTCCAAAGCGGCGGTTTCGCCTTCCTGGGCACGGCGAACATGAACGTCAGCACCTCGGGTATCGGCATCGGCAACAACAACCTGGATGGCAATGGCACTGCGGGCATCAATGCCGGCGACGAAAGCTTCGTCATCAACCCGGAAAGCCTGCTGACGGCGGTGAAGGTCTTCATCGACAACTCGGTGCAGGGCTACACCCCGGCTACGGAGGACCTGTACTACCGGATCTTCTACGCCGATGGCTCCACCTCGGGGGATATCGAGGTCCTGGCCGGCGACCTGACCGCCGAGGCGGGGGGGCAGACCTCCTTCCTCATCGAGCGGCAGGGCGACAAGCTGATCGATGCGGTCCAGCTCACGATGGGGCTCGGCGTGATCAAGATCCCGGTGATCCAGTTCATCCAGGAGACCGAGAACCTGGCGAGCGACATCAAGCTCGGCTTCAGCGCGGTGGTGACCGACAGGGACGGTGACCAGGCGACGAGTCTCTTCGACGCCACCCTCTACGCCGACGAAGCGGCCGGTGCGACCTTCAACTACGTGCTGGCGGGAGCCCCGGGCGAGCAGGACAGCTTCAACGTCGACCTGTCGTTCGCCCAGAACAGCTACCAGGTGACCGGCTTCGACGCCGGGGTGGGGCAGCGCGATGCGCTGGTGCTCCTCGGCGATCCGGGTGCCGTCGTACAACCGATCGACAACAGCGGCGATGACAGCATCGTCACCGTCACCGAGTCCGGTGGGCAGACGACGACCATCACCGTGGTCGGGGTCGACCTGCAGGTGAGCGACATCTTCTTCGGCGCGGCCTGA
+
+>PSDM_0002 ATGCGCGTGATGCTGGTCGACTGTCGTCCCCTTCTGCTGCTTGGACTTCAGGAACTGGTGGACGCACAGAAACCCCACATGGAGGTGGTGGGACAGGCAAGCACCTACGGCAGTGCCCTGGACGCGGTCGCCTCGTTGCGACCGGATGTCATCCTGCTCGGTTTCTTCGACGATCCGCTGGACCCGCTGCGCGCCATCGAGCGCCTGGTGCATCACGCCCGGACGCGGGTGCTGGTGTTCAGGGACAGCCGGGAGGCGATCCCCGCCGACCTGGCGATGGCGGCGGGAGCCTGTGGCAGCGTGCAGGTGGAGGATTCGGCGGCGGTGATCCTAAAGGCCATAACCACTGCCGGGCAAAGCCCGATCGATGGGGCCCCGCCCCACGCGATCGGACGCTCGCAGACGACGCACGCCGTTCCCGTCATCAACCTGGAAAGCTCACGGCACGCCCAGCTCACCGAGCGGGAAATGCAGTTGATCCACGCCCTGGTCGGCGACCCCTCGGCCAAGTACATCTGCATCGCGGAGCAGTTGGGCATCAGCGAGCACACGGTGCATAACCACCTGAGCAACATCTATCACAAGCTCAATGTGATCAATCGCATCGACCTGTTGATGTACGCCATGAAGCACGGCCTGACCAAGAACGCGAATCCCCCTGACTCAGCCTGCGGCTGA
+
+>PSDM_0003 ATGGAAATGGATTGGAGCAAGGCGCTGCAAGAAAGCCTCGGCTGGCTTGCCATCGCGTCCCTGATCACCATCGTTGCCTTCGCCGCGGCCGGTGCCGCAGCAGTGAAGTTCACCCGTTGGGGCAGCCAGTTCTGGCAGATCGCCGGCCCCTATCTCAGCCCGAAACGCAGCTGGCGACCGCTGCTGGCGTTCACCCTGCTGCTGGTGCTGACCCTGTTCTCGGTACGCATGAACGTGCTCTTCTCGTTCTGGTACAACGGTTTCTACAGCGCCCTCCAGGGGCTGGACCAGAAGGCCTTCTGGTACTTCCTCGGGATCTTCTCGGTGCTGGCCACCATCCACGTGCTGCGGGCGCTGTTCACCTACTACGTGACCCAGGCCTTCAATATCCACTGGCGGGTCTGGCTCAACGACCGGCTCACCGCTGACTGGATGAAGGGCGACGCCTACTACCGTGGCCAGTTCCTCGCCGAGCCGGTGGACAACCCCGACCAGCGTATCGAGCTGGACGTGAATTCCTTCGTCAACGGCTCGGTCTCCCTGGCGCTCGGCGCCGTGAGCGCGTTGGTCTCCCTGGTGGCCTTCACCGGCATCCTCTGGGGCCTGTCGGCGCCCTTCGAGCTGGGTGGCGTGGAGATTCCCCGGGCCATGGTCTTCGCCGTCTACATCTACGTGATCATCGCCACCTGGATCGCCTTCCGCCTGGGCCGTCCGCTGATCCGGCTGAACTTCCTCAACGAGAAGCTCACCGCGAACTTCCGCTACGCCCTGATGCGCCTGCGGGAATACGCCGAGAACGTCGCCTTCTACCAGGGCACCGCGATCGAGCGCGGCACCCTGCTCGGCCGCTTCTCCGCGCTGATCGGCAACGTCTGGGCATTGGTCTACCGGACCCTGAAGTTCGACGGCTTCAACCTGGCGGTGAGCCAGGTGGCGGTGATCTTCCCCTTCATCCTCCAGGCGCCGCGCTTCTTCAGCGGCGCCATCAAGCTGGGCGACGTGATGCAGACCTCCCAGGCCTTCGGCCAGGTGCAGGACTCGCTGTCGTTCTTCCGCAGCTCCTACGACACCTTCGCCCAGTACCGCGCCACCCTCGACCGCCTCACCGGCTTCCTCGACGCCAACGAGGACGCCCGCGAGCTGCCCCGGGTCGTCACCCGGGAAGCGGCGGACAGCCTGCGCATCGAAGGCATGGACGTGCTGCGCCCGGACGGCCACCGGCTGCTGGCGGACCTGAACCTCGCGCTGCAACCCGGCCAGGCGCTGCTGATCAGGGGCCCCTCCGGCAGCGGCAAGACCACCCTGCTGCGCTCCCTGGCCGGCCTCTGGCCCTACGCCGAGGGCAAGGTCCAGCGCCCCGGCGGGCACCAGGCGCTGTTCCTCTCCCAGCGCCCCTACCTGCCCCTGGGCGACCTGCGCACCGCCATCGCCTACCCCAACACCAGCACGCCGGACGACGACGAACGCCTGAAGCAGGCCCTGCGCCGGGTCAACCTCGCCCACCTGGCGGAGCACCTGGACCTCAGCCAGGACTGGACGCGCATCCTCTCCATCGGCGAACAGCAGCGCCTGGCCTTCGCCCGGGTGCTGTTCAACCAGCCGCGCATCGTCTTCCTCGACGAGTCCACCTCGGCCATGGACGAAGGCCTGGAGCACGCCCTCTACTCGCTGCTGCGTGAAGAGCTGGGCGATACCCTGCTGGTGAGCGTCGGCCACCGCGCCACCCTCACCCAGTTCCACACCCATCGCCTGGAGGTGGACGGACAGGGCGGCTGGTCGCTGCTGGAGCAACGGCCGGCGATGGCCGGCGGCGTCTGA
+.
+.
+.
+```
+
+之後我們按照這篇論文[CAIcal: A combined set of tools to assess codon usage adaptation](https://biologydirect.biomedcentral.com/articles/10.1186/1745-6150-3-38)將FASTA進行CODON的統計，最後將網頁輸出的結果整理成表格後，在將該表格輸入進R，進行Tidy。**注:CAIcal往網站掛掉了，以後可能要自己推算。**
+
+```{r, eval=FALSE}
+codon <- read_csv(file = "codon A46 3.csv") %>%
+  #我們移除第一行，這行是編號，對我們幫助不大
+  select(-X1)
+#我們稍微來看一下資料結構
+codon
+```
+
+```{r echo= FALSE, hide= TRUE, message=FALSE, warning=FALSE}
+codon <- read_csv(file = "raw_data/codon A46 3.csv") %>%
+  #我們移除第一行，這行是編號，對我們幫助不大
+  select(-X1)
+#我們稍微來看一下資料結構
+codon
+```
+
+我們可以注意到，經由CAIcal網站轉換過我們的序列後，可以統計出各胺基酸對應之Codon在各個基因分布的狀況，我們就可以從這張表利用Tidyverse的技巧將**Codon Usage Table**做出來。
+
+# HomeWork (2019/8/19)
+
+請各位使用Tidyverse的技巧，將上表進行轉換，輸出格式如下表，[資料連結](https://drive.google.com/file/d/1T5aiLhffSl5-IgLlD_BcadCoKOH3-Mch/view?usp=sharing)
+
+提示：
+
+1. 由於要加總row的值，將會用到`rowSums()`
+
+2. `%>%` 的快速鍵為 **Crtl + Shift + M**
+
+3. `<-` 的快速鍵為 **Alt + -**
+
+4. 請善用`group_by()`以及`summarise()`
+
+5. 將做出來的表存在變數`codon_usage`
+
+6. 請先安裝package `tidyverse`以及`stringr`
+
+7. **(進階)**本表沒有包含`Stop Codon`，壓縮檔中有一個`merged_document_annotations.csv`檔案，裡頭包含所有序列之資料，可以嘗試運行下段指令與你做出來的表結合，即可獲得完整64個codon的**Codon Usage Table**。
+
+
+```{r echo= FALSE, hide= TRUE, message=FALSE, warning=FALSE}
+library(tidyverse)
+codon <- read_csv(file = "raw_data/codon A46 3.csv") %>% 
+  select(-X1)
+codon_usage <- codon %>%
+  mutate(Sum= rowSums(.[3:5966])) %>%
+  group_by(Aminoacids, CODONS) %>%
+  summarize(Sum= Sum) %>%
+  group_by(Aminoacids) %>%
+  mutate(freq=round(Sum/sum(Sum),6))
+
+knitr::kable(codon_usage)
+```
+
+
+```{r message=FALSE, warning=FALSE, eval=FALSE}
+#extract the stop codon form annotation data
+csv <- read.csv("merged_document_annotations.csv", stringsAsFactors= FALSE)
+Sequence <- csv %>%
+  select(locus_tag, Sequence) %>%
+  arrange(locus_tag)
+rownames(Sequence) <- Sequence[,1]
+Sequence <- Sequence[,-1]
+#extract the last 3 charater from each CDS DNA sequence
+library(stringr)
+stopcodon <- str_sub(Sequence, start= -3)
+#calculate the 3 stop codon total number and make the stop codon usage table
+stop_codon<- as.data.frame(table(stopcodon))
+stop_codno_f<- stop_codon %>%
+  mutate(Aminoacids= c("*","*","*")) %>%
+  group_by(Aminoacids) %>%
+  mutate(freq = round(Freq/sum(Freq), 6)) %>%
+  rename(Aminoacids= Aminoacids,CODONS= stopcodon, Sum=Freq, freq=freq) %>%
+  mutate(CODONS = as.character(CODONS))%>%
+  select(Aminoacids, CODONS, Sum, freq)
+#merge two codon usage table to 64 codon usage table, then output the final result
+codon_usage_f<-bind_rows(codon_usage, stop_codno_f)
+codon_usage_f
+```
+
+```{r echo= FALSE, hide= TRUE, message=FALSE, warning=FALSE}
+#extract the stop codon form annotation data
+csv <- read.csv("raw_data/merged_document_annotations.csv", stringsAsFactors= FALSE)
+Sequence <- csv %>%
+  select(locus_tag, Sequence) %>%
+  arrange(locus_tag)
+rownames(Sequence) <- Sequence[,1]
+Sequence <- Sequence[,-1]
+#extract the last 3 charater from each CDS DNA sequence
+library(stringr)
+stopcodon <- str_sub(Sequence, start= -3)
+#calculate the 3 stop codon total number and make the stop codon usage table
+stop_codon<- as.data.frame(table(stopcodon))
+stop_codno_f<- stop_codon %>%
+  mutate(Aminoacids= c("*","*","*")) %>%
+  group_by(Aminoacids) %>%
+  mutate(freq = round(Freq/sum(Freq), 6)) %>%
+  rename(Aminoacids= Aminoacids,CODONS= stopcodon, Sum=Freq, freq=freq) %>%
+  mutate(CODONS = as.character(CODONS))%>%
+  select(Aminoacids, CODONS, Sum, freq)
+#merge two codon usage table to 64 codon usage table, then output the final result
+codon_usage_f<-bind_rows(codon_usage, stop_codno_f)
+knitr::kable(codon_usage_f)
+```

@@ -1,0 +1,900 @@
+---
+title: Codon Usage
+author: Che-Wei
+date: '2019-08-19'
+slug: codon-usage
+categories: []
+tags: []
+output:
+  blogdown::html_page:
+    toc: true
+    toc_float: false
+    toc_depth: 4
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#codon-usage-of-pseudomonas-a46">Codon Usage of <em>Pseudomonas A46</em></a></li>
+<li><a href="#codon-usage-frequence">Codon Usage Frequence</a></li>
+<li><a href="#homework-2019819">HomeWork (2019/8/19)</a></li>
+</ul>
+</div>
+
+<p>當我們完成Datacamp課程<a href="https://campus.datacamp.com/courses/dplyr-data-manipulation-r-tutorial/chapter-one-introduction-to-dplyr-and-tbls?ex=1">Data Manipulation in R with dplyr</a>或者<a href="https://www.datacamp.com/courses/communicating-with-data-in-the-tidyverse">Communicating with Data in the Tidyverse</a>，你應該已經熟悉使用<strong>Tidyverse</strong>的語法了，我們就來進行實作練習。</p>
+<div id="codon-usage-of-pseudomonas-a46" class="section level1">
+<h1>Codon Usage of <em>Pseudomonas A46</em></h1>
+<p>細菌是我們最常使用的生物宿主(Host)，但是我們對於細菌的掌握大多只限於幾隻strain，如<em>Escherichia coli</em>、<em>Saccharomyces cerevisiae</em>，如果今天要使用細菌作為蛋白質表現(Express)之工具，我們必須熟知<strong>質體學、微生物學以及分子生物</strong>，少了任何一個環節你沒有弄清楚，實驗注定會失敗。</p>
+<p>今天我們就以<strong>重組蛋白(Fusion-Protein)</strong>為例子，今天剛好我們從野外的汙染土壤中，篩選出一隻對重金屬抗性很強的細菌，經過鑑定以及次世代定序(NGS)，我們得知這株菌為<strong><em>Pseudomonas</em> sp. A46</strong>，並且我們擁有其部分基因體(<a href="https://www.ncbi.nlm.nih.gov/nuccore/NBMS00000000">Draft Genome</a>)。</p>
+<p>擁有以上資訊後，我們試圖將外源基因轉殖至本株菌中，首先我們已經建構好可以在這株菌的<strong>穿梭載體(Shutle Vector)</strong>，包含了大腸桿菌的ori(pUC)以及<em>P.</em> A46的ori(pRO16000)，以及確認可以表現出蛋白質之啟動子(Promotor, <a href="http://parts.igem.org/Part:BBa_J23100">J23100</a>)，外源基因也找好了，但是我們遇到一個問題，那就是當我們要預先設計序列以及確認蛋白質是否適合於這株菌做表現，我們沒有這株菌的<strong>Codon Usage Frequence</strong>。</p>
+</div>
+<div id="codon-usage-frequence" class="section level1">
+<h1>Codon Usage Frequence</h1>
+<p>每一株菌都有其不同的密碼子使用，目前日本有一個<a href="https://www.kazusa.or.jp/codon/">Codon Usage Database</a>，這裡面登入了許多菌種的<strong>Codon Usage Table</strong>，但是值得注意的是，每隻菌種使用的CDS數去統計密碼子的使用頻率都不一樣，有的甚至只有適用1條基因就建檔了，結果是難以被相信的。</p>
+<p>幸好我們已經有這株菌的基因體序列，在基因體中我們有5964個Open Reading Frame(ORF)預測可以表現成蛋白質，於是乎我們可以將這些序列用來統計<strong>Codon Usage Frequence</strong>。</p>
+<p>首先我們先看一下這株菌的ORF FASTA檔案：</p>
+<pre><code>&gt;PSDM_0001 GTGAGCGCGCCCGGCGGCGTGGACAGCGGCCTGCTGGATTCGCTGACGGGCAACAGGATCTACCTGTTCCTGCAGGGAGGCGCGGTGGTCGGGCGCGTGGGTACCGCGGGTGGCCTGGCCGATGCCGGGGGCGCCCAGTCGTTCATGATCAGCGTGGTTGCCAGCAGCGGTCTCGTGAGCCTGAGCCAGAGCCGTTCGATCATCCATGACGATCCGCTGGACCCCTTCGAGACGGGGGCTTCCGCCGCTGGACTGGCGGCGAGCCTGGTGACCCTGACGGCGACCATCACCGACGGCGATGGCGACACGGCTTCGGCCACCCGCGAGATCGGCGGCGCATTCAAGTTCGAGGACGACGGTCCTGCGCTCGCCTTCGGCAACCTCGTCGGGACGGGCAGCATCCTGCCGCAGTACGGCTTCTGGAGCATGGATCCGGGCACCGATGGCCTGGGGGCGGCCGGGCTGGACATCAGCCTGGTGGGCGGTGAGTTCACCCTGGTCAGGCCGGATGGCACCACCACCACGGGCACCGGTACGCTCACCGAGCAGTCGCCTTCGCCGGATGGCAATGGCGCCTATCGTTTCGCCGGCACCCTTACGGGGGACTTCGACAATAACGCCTCCACGGCGGACACCAGCATCGACTACAGCCTCACCGCCTTCGCCGACGGCACCTATGCACTGGACCTGGTGCAGGGGGTCAGCTCGACGATAGTGCGCAGCAGCGCCGACGGCGCCCTGGATGCCGGAGGCCCGGACCCCGTGCGGACCTTGCTGATTCCGGAGCAGGATCCGCCGACCATTCCGTCGCCGTCCGAGGAGATCGTGTTCTTCGGCGTCAATGCGACCACCAGCGCCGCTGACATCTTCACGGCCATCGGGCCCGGGGAGCCGGACCTCACCGAAGCCCAGGTCCAAAGCGGCGGTTTCGCCTTCCTGGGCACGGCGAACATGAACGTCAGCACCTCGGGTATCGGCATCGGCAACAACAACCTGGATGGCAATGGCACTGCGGGCATCAATGCCGGCGACGAAAGCTTCGTCATCAACCCGGAAAGCCTGCTGACGGCGGTGAAGGTCTTCATCGACAACTCGGTGCAGGGCTACACCCCGGCTACGGAGGACCTGTACTACCGGATCTTCTACGCCGATGGCTCCACCTCGGGGGATATCGAGGTCCTGGCCGGCGACCTGACCGCCGAGGCGGGGGGGCAGACCTCCTTCCTCATCGAGCGGCAGGGCGACAAGCTGATCGATGCGGTCCAGCTCACGATGGGGCTCGGCGTGATCAAGATCCCGGTGATCCAGTTCATCCAGGAGACCGAGAACCTGGCGAGCGACATCAAGCTCGGCTTCAGCGCGGTGGTGACCGACAGGGACGGTGACCAGGCGACGAGTCTCTTCGACGCCACCCTCTACGCCGACGAAGCGGCCGGTGCGACCTTCAACTACGTGCTGGCGGGAGCCCCGGGCGAGCAGGACAGCTTCAACGTCGACCTGTCGTTCGCCCAGAACAGCTACCAGGTGACCGGCTTCGACGCCGGGGTGGGGCAGCGCGATGCGCTGGTGCTCCTCGGCGATCCGGGTGCCGTCGTACAACCGATCGACAACAGCGGCGATGACAGCATCGTCACCGTCACCGAGTCCGGTGGGCAGACGACGACCATCACCGTGGTCGGGGTCGACCTGCAGGTGAGCGACATCTTCTTCGGCGCGGCCTGA
+
+&gt;PSDM_0002 ATGCGCGTGATGCTGGTCGACTGTCGTCCCCTTCTGCTGCTTGGACTTCAGGAACTGGTGGACGCACAGAAACCCCACATGGAGGTGGTGGGACAGGCAAGCACCTACGGCAGTGCCCTGGACGCGGTCGCCTCGTTGCGACCGGATGTCATCCTGCTCGGTTTCTTCGACGATCCGCTGGACCCGCTGCGCGCCATCGAGCGCCTGGTGCATCACGCCCGGACGCGGGTGCTGGTGTTCAGGGACAGCCGGGAGGCGATCCCCGCCGACCTGGCGATGGCGGCGGGAGCCTGTGGCAGCGTGCAGGTGGAGGATTCGGCGGCGGTGATCCTAAAGGCCATAACCACTGCCGGGCAAAGCCCGATCGATGGGGCCCCGCCCCACGCGATCGGACGCTCGCAGACGACGCACGCCGTTCCCGTCATCAACCTGGAAAGCTCACGGCACGCCCAGCTCACCGAGCGGGAAATGCAGTTGATCCACGCCCTGGTCGGCGACCCCTCGGCCAAGTACATCTGCATCGCGGAGCAGTTGGGCATCAGCGAGCACACGGTGCATAACCACCTGAGCAACATCTATCACAAGCTCAATGTGATCAATCGCATCGACCTGTTGATGTACGCCATGAAGCACGGCCTGACCAAGAACGCGAATCCCCCTGACTCAGCCTGCGGCTGA
+
+&gt;PSDM_0003 ATGGAAATGGATTGGAGCAAGGCGCTGCAAGAAAGCCTCGGCTGGCTTGCCATCGCGTCCCTGATCACCATCGTTGCCTTCGCCGCGGCCGGTGCCGCAGCAGTGAAGTTCACCCGTTGGGGCAGCCAGTTCTGGCAGATCGCCGGCCCCTATCTCAGCCCGAAACGCAGCTGGCGACCGCTGCTGGCGTTCACCCTGCTGCTGGTGCTGACCCTGTTCTCGGTACGCATGAACGTGCTCTTCTCGTTCTGGTACAACGGTTTCTACAGCGCCCTCCAGGGGCTGGACCAGAAGGCCTTCTGGTACTTCCTCGGGATCTTCTCGGTGCTGGCCACCATCCACGTGCTGCGGGCGCTGTTCACCTACTACGTGACCCAGGCCTTCAATATCCACTGGCGGGTCTGGCTCAACGACCGGCTCACCGCTGACTGGATGAAGGGCGACGCCTACTACCGTGGCCAGTTCCTCGCCGAGCCGGTGGACAACCCCGACCAGCGTATCGAGCTGGACGTGAATTCCTTCGTCAACGGCTCGGTCTCCCTGGCGCTCGGCGCCGTGAGCGCGTTGGTCTCCCTGGTGGCCTTCACCGGCATCCTCTGGGGCCTGTCGGCGCCCTTCGAGCTGGGTGGCGTGGAGATTCCCCGGGCCATGGTCTTCGCCGTCTACATCTACGTGATCATCGCCACCTGGATCGCCTTCCGCCTGGGCCGTCCGCTGATCCGGCTGAACTTCCTCAACGAGAAGCTCACCGCGAACTTCCGCTACGCCCTGATGCGCCTGCGGGAATACGCCGAGAACGTCGCCTTCTACCAGGGCACCGCGATCGAGCGCGGCACCCTGCTCGGCCGCTTCTCCGCGCTGATCGGCAACGTCTGGGCATTGGTCTACCGGACCCTGAAGTTCGACGGCTTCAACCTGGCGGTGAGCCAGGTGGCGGTGATCTTCCCCTTCATCCTCCAGGCGCCGCGCTTCTTCAGCGGCGCCATCAAGCTGGGCGACGTGATGCAGACCTCCCAGGCCTTCGGCCAGGTGCAGGACTCGCTGTCGTTCTTCCGCAGCTCCTACGACACCTTCGCCCAGTACCGCGCCACCCTCGACCGCCTCACCGGCTTCCTCGACGCCAACGAGGACGCCCGCGAGCTGCCCCGGGTCGTCACCCGGGAAGCGGCGGACAGCCTGCGCATCGAAGGCATGGACGTGCTGCGCCCGGACGGCCACCGGCTGCTGGCGGACCTGAACCTCGCGCTGCAACCCGGCCAGGCGCTGCTGATCAGGGGCCCCTCCGGCAGCGGCAAGACCACCCTGCTGCGCTCCCTGGCCGGCCTCTGGCCCTACGCCGAGGGCAAGGTCCAGCGCCCCGGCGGGCACCAGGCGCTGTTCCTCTCCCAGCGCCCCTACCTGCCCCTGGGCGACCTGCGCACCGCCATCGCCTACCCCAACACCAGCACGCCGGACGACGACGAACGCCTGAAGCAGGCCCTGCGCCGGGTCAACCTCGCCCACCTGGCGGAGCACCTGGACCTCAGCCAGGACTGGACGCGCATCCTCTCCATCGGCGAACAGCAGCGCCTGGCCTTCGCCCGGGTGCTGTTCAACCAGCCGCGCATCGTCTTCCTCGACGAGTCCACCTCGGCCATGGACGAAGGCCTGGAGCACGCCCTCTACTCGCTGCTGCGTGAAGAGCTGGGCGATACCCTGCTGGTGAGCGTCGGCCACCGCGCCACCCTCACCCAGTTCCACACCCATCGCCTGGAGGTGGACGGACAGGGCGGCTGGTCGCTGCTGGAGCAACGGCCGGCGATGGCCGGCGGCGTCTGA
+.
+.
+.</code></pre>
+<p>之後我們按照這篇論文<a href="https://biologydirect.biomedcentral.com/articles/10.1186/1745-6150-3-38">CAIcal: A combined set of tools to assess codon usage adaptation</a>將FASTA進行CODON的統計，最後將網頁輸出的結果整理成表格後，在將該表格輸入進R，進行Tidy。<strong>注:CAIcal往網站掛掉了，以後可能要自己推算。</strong></p>
+<pre class="r"><code>codon &lt;- read_csv(file = &quot;codon A46 3.csv&quot;) %&gt;%
+  #我們移除第一行，這行是編號，對我們幫助不大
+  select(-X1)
+#我們稍微來看一下資料結構
+codon</code></pre>
+<pre><code>## # A tibble: 61 x 5,966
+##    CODONS Aminoacids PSDM_0001 PSDM_0002 PSDM_0003 PSDM_0004 PSDM_0005
+##    &lt;chr&gt;  &lt;chr&gt;          &lt;int&gt;     &lt;int&gt;     &lt;int&gt;     &lt;int&gt;     &lt;int&gt;
+##  1 TTT    F                  0         0         0         0         0
+##  2 TTC    F                 29         3        39         6         6
+##  3 TTA    L                  0         0         0         0         0
+##  4 TTG    L                  1         4         2         5         0
+##  5 CTT    L                  1         3         1         2         0
+##  6 CTC    L                 14         3        26         3         0
+##  7 CTA    L                  0         1         0         1         0
+##  8 CTG    L                 33        16        60        13         2
+##  9 ATT    I                  2         0         1         1         0
+## 10 ATC    I                 30        14        25         4         2
+## # ... with 51 more rows, and 5,959 more variables: PSDM_0006 &lt;int&gt;,
+## #   PSDM_0007 &lt;int&gt;, PSDM_0008 &lt;int&gt;, PSDM_0009 &lt;int&gt;, PSDM_0010 &lt;int&gt;,
+## #   PSDM_0011 &lt;int&gt;, PSDM_0012 &lt;int&gt;, PSDM_0013 &lt;int&gt;, PSDM_0014 &lt;int&gt;,
+## #   PSDM_0015 &lt;int&gt;, PSDM_0016 &lt;int&gt;, PSDM_0017 &lt;int&gt;, PSDM_0018 &lt;int&gt;,
+## #   PSDM_0019 &lt;int&gt;, PSDM_0020 &lt;int&gt;, PSDM_0021 &lt;int&gt;, PSDM_0022 &lt;int&gt;,
+## #   PSDM_0023 &lt;int&gt;, PSDM_0024 &lt;int&gt;, PSDM_0025 &lt;int&gt;, PSDM_0026 &lt;int&gt;,
+## #   PSDM_0027 &lt;int&gt;, PSDM_0028 &lt;int&gt;, PSDM_0029 &lt;int&gt;, PSDM_0030 &lt;int&gt;,
+## #   PSDM_0031 &lt;int&gt;, PSDM_0032 &lt;int&gt;, PSDM_0033 &lt;int&gt;, PSDM_0034 &lt;int&gt;,
+## #   PSDM_0035 &lt;int&gt;, PSDM_0036 &lt;int&gt;, PSDM_0037 &lt;int&gt;, PSDM_0038 &lt;int&gt;,
+## #   PSDM_0039 &lt;int&gt;, PSDM_0040 &lt;int&gt;, PSDM_0041 &lt;int&gt;, PSDM_0042 &lt;int&gt;,
+## #   PSDM_0043 &lt;int&gt;, PSDM_0044 &lt;int&gt;, PSDM_0045 &lt;int&gt;, PSDM_0046 &lt;int&gt;,
+## #   PSDM_0047 &lt;int&gt;, PSDM_0048 &lt;int&gt;, PSDM_0049 &lt;int&gt;, PSDM_0050 &lt;int&gt;,
+## #   PSDM_0051 &lt;int&gt;, PSDM_0052 &lt;int&gt;, PSDM_0053 &lt;int&gt;, PSDM_0054 &lt;int&gt;,
+## #   PSDM_0055 &lt;int&gt;, PSDM_0056 &lt;int&gt;, PSDM_0057 &lt;int&gt;, PSDM_0058 &lt;int&gt;,
+## #   PSDM_0059 &lt;int&gt;, PSDM_0060 &lt;int&gt;, PSDM_0061 &lt;int&gt;, PSDM_0062 &lt;int&gt;,
+## #   PSDM_0063 &lt;int&gt;, PSDM_0064 &lt;int&gt;, PSDM_0065 &lt;int&gt;, PSDM_0066 &lt;int&gt;,
+## #   PSDM_0067 &lt;int&gt;, PSDM_0068 &lt;int&gt;, PSDM_0069 &lt;int&gt;, PSDM_0070 &lt;int&gt;,
+## #   PSDM_0071 &lt;int&gt;, PSDM_0072 &lt;int&gt;, PSDM_0073 &lt;int&gt;, PSDM_0074 &lt;int&gt;,
+## #   PSDM_0075 &lt;int&gt;, PSDM_0076 &lt;int&gt;, PSDM_0077 &lt;int&gt;, PSDM_0078 &lt;int&gt;,
+## #   PSDM_0079 &lt;int&gt;, PSDM_0080 &lt;int&gt;, PSDM_0081 &lt;int&gt;, PSDM_0082 &lt;int&gt;,
+## #   PSDM_0083 &lt;int&gt;, PSDM_0084 &lt;int&gt;, PSDM_0085 &lt;int&gt;, PSDM_0086 &lt;int&gt;,
+## #   PSDM_0087 &lt;int&gt;, PSDM_0088 &lt;int&gt;, PSDM_0089 &lt;int&gt;, PSDM_0090 &lt;int&gt;,
+## #   PSDM_0091 &lt;int&gt;, PSDM_0092 &lt;int&gt;, PSDM_0093 &lt;int&gt;, PSDM_0094 &lt;int&gt;,
+## #   PSDM_0095 &lt;int&gt;, PSDM_0096 &lt;int&gt;, PSDM_0097 &lt;int&gt;, PSDM_0098 &lt;int&gt;,
+## #   PSDM_0099 &lt;int&gt;, PSDM_0100 &lt;int&gt;, PSDM_0101 &lt;int&gt;, PSDM_0102 &lt;int&gt;,
+## #   PSDM_0103 &lt;int&gt;, PSDM_0104 &lt;int&gt;, PSDM_0105 &lt;int&gt;, ...</code></pre>
+<p>我們可以注意到，經由CAIcal網站轉換過我們的序列後，可以統計出各胺基酸對應之Codon在各個基因分布的狀況，我們就可以從這張表利用Tidyverse的技巧將<strong>Codon Usage Table</strong>做出來。</p>
+</div>
+<div id="homework-2019819" class="section level1">
+<h1>HomeWork (2019/8/19)</h1>
+<p>請各位使用Tidyverse的技巧，將上表進行轉換，輸出格式如下表，<a href="https://drive.google.com/file/d/1T5aiLhffSl5-IgLlD_BcadCoKOH3-Mch/view?usp=sharing">資料連結</a></p>
+<p>提示：</p>
+<ol style="list-style-type: decimal">
+<li><p>由於要加總row的值，將會用到<code>rowSums()</code></p></li>
+<li><p><code>%&gt;%</code> 的快速鍵為 <strong>Crtl + Shift + M</strong></p></li>
+<li><p><code>&lt;-</code> 的快速鍵為 <strong>Alt + -</strong></p></li>
+<li><p>請善用<code>group_by()</code>以及<code>summarise()</code></p></li>
+<li><p>將做出來的表存在變數<code>codon_usage</code></p></li>
+<li><p>請先安裝package <code>tidyverse</code>以及<code>stringr</code></p></li>
+<li><p><strong>(進階)</strong>本表沒有包含<code>Stop Codon</code>，壓縮檔中有一個<code>merged_document_annotations.csv</code>檔案，裡頭包含所有序列之資料，可以嘗試運行下段指令與你做出來的表結合，即可獲得完整64個codon的<strong>Codon Usage Table</strong>。</p></li>
+</ol>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Aminoacids</th>
+<th align="left">CODONS</th>
+<th align="right">Sum</th>
+<th align="right">freq</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">A</td>
+<td align="left">GCA</td>
+<td align="right">11150</td>
+<td align="right">0.053200</td>
+</tr>
+<tr class="even">
+<td align="left">A</td>
+<td align="left">GCC</td>
+<td align="right">134339</td>
+<td align="right">0.640970</td>
+</tr>
+<tr class="odd">
+<td align="left">A</td>
+<td align="left">GCG</td>
+<td align="right">53336</td>
+<td align="right">0.254481</td>
+</tr>
+<tr class="even">
+<td align="left">A</td>
+<td align="left">GCT</td>
+<td align="right">10762</td>
+<td align="right">0.051349</td>
+</tr>
+<tr class="odd">
+<td align="left">C</td>
+<td align="left">TGC</td>
+<td align="right">16541</td>
+<td align="right">0.886394</td>
+</tr>
+<tr class="even">
+<td align="left">C</td>
+<td align="left">TGT</td>
+<td align="right">2120</td>
+<td align="right">0.113606</td>
+</tr>
+<tr class="odd">
+<td align="left">D</td>
+<td align="left">GAC</td>
+<td align="right">76359</td>
+<td align="right">0.754424</td>
+</tr>
+<tr class="even">
+<td align="left">D</td>
+<td align="left">GAT</td>
+<td align="right">24856</td>
+<td align="right">0.245576</td>
+</tr>
+<tr class="odd">
+<td align="left">E</td>
+<td align="left">GAA</td>
+<td align="right">40076</td>
+<td align="right">0.357458</td>
+</tr>
+<tr class="even">
+<td align="left">E</td>
+<td align="left">GAG</td>
+<td align="right">72038</td>
+<td align="right">0.642542</td>
+</tr>
+<tr class="odd">
+<td align="left">F</td>
+<td align="left">TTC</td>
+<td align="right">61663</td>
+<td align="right">0.923085</td>
+</tr>
+<tr class="even">
+<td align="left">F</td>
+<td align="left">TTT</td>
+<td align="right">5138</td>
+<td align="right">0.076915</td>
+</tr>
+<tr class="odd">
+<td align="left">G</td>
+<td align="left">GGA</td>
+<td align="right">8226</td>
+<td align="right">0.053645</td>
+</tr>
+<tr class="even">
+<td align="left">G</td>
+<td align="left">GGC</td>
+<td align="right">105942</td>
+<td align="right">0.690887</td>
+</tr>
+<tr class="odd">
+<td align="left">G</td>
+<td align="left">GGG</td>
+<td align="right">19797</td>
+<td align="right">0.129104</td>
+</tr>
+<tr class="even">
+<td align="left">G</td>
+<td align="left">GGT</td>
+<td align="right">19377</td>
+<td align="right">0.126365</td>
+</tr>
+<tr class="odd">
+<td align="left">H</td>
+<td align="left">CAC</td>
+<td align="right">29128</td>
+<td align="right">0.706562</td>
+</tr>
+<tr class="even">
+<td align="left">H</td>
+<td align="left">CAT</td>
+<td align="right">12097</td>
+<td align="right">0.293438</td>
+</tr>
+<tr class="odd">
+<td align="left">I</td>
+<td align="left">ATA</td>
+<td align="right">2073</td>
+<td align="right">0.025349</td>
+</tr>
+<tr class="even">
+<td align="left">I</td>
+<td align="left">ATC</td>
+<td align="right">71723</td>
+<td align="right">0.877045</td>
+</tr>
+<tr class="odd">
+<td align="left">I</td>
+<td align="left">ATT</td>
+<td align="right">7982</td>
+<td align="right">0.097606</td>
+</tr>
+<tr class="even">
+<td align="left">K</td>
+<td align="left">AAA</td>
+<td align="right">8347</td>
+<td align="right">0.147656</td>
+</tr>
+<tr class="odd">
+<td align="left">K</td>
+<td align="left">AAG</td>
+<td align="right">48183</td>
+<td align="right">0.852344</td>
+</tr>
+<tr class="even">
+<td align="left">L</td>
+<td align="left">CTA</td>
+<td align="right">2206</td>
+<td align="right">0.009938</td>
+</tr>
+<tr class="odd">
+<td align="left">L</td>
+<td align="left">CTC</td>
+<td align="right">48181</td>
+<td align="right">0.217056</td>
+</tr>
+<tr class="even">
+<td align="left">L</td>
+<td align="left">CTG</td>
+<td align="right">149156</td>
+<td align="right">0.671950</td>
+</tr>
+<tr class="odd">
+<td align="left">L</td>
+<td align="left">CTT</td>
+<td align="right">8030</td>
+<td align="right">0.036175</td>
+</tr>
+<tr class="even">
+<td align="left">L</td>
+<td align="left">TTA</td>
+<td align="right">791</td>
+<td align="right">0.003563</td>
+</tr>
+<tr class="odd">
+<td align="left">L</td>
+<td align="left">TTG</td>
+<td align="right">13611</td>
+<td align="right">0.061318</td>
+</tr>
+<tr class="even">
+<td align="left">M</td>
+<td align="left">ATG</td>
+<td align="right">39957</td>
+<td align="right">1.000000</td>
+</tr>
+<tr class="odd">
+<td align="left">N</td>
+<td align="left">AAC</td>
+<td align="right">41567</td>
+<td align="right">0.825627</td>
+</tr>
+<tr class="even">
+<td align="left">N</td>
+<td align="left">AAT</td>
+<td align="right">8779</td>
+<td align="right">0.174373</td>
+</tr>
+<tr class="odd">
+<td align="left">P</td>
+<td align="left">CCA</td>
+<td align="right">4874</td>
+<td align="right">0.052496</td>
+</tr>
+<tr class="even">
+<td align="left">P</td>
+<td align="left">CCC</td>
+<td align="right">38286</td>
+<td align="right">0.412365</td>
+</tr>
+<tr class="odd">
+<td align="left">P</td>
+<td align="left">CCG</td>
+<td align="right">43989</td>
+<td align="right">0.473790</td>
+</tr>
+<tr class="even">
+<td align="left">P</td>
+<td align="left">CCT</td>
+<td align="right">5696</td>
+<td align="right">0.061350</td>
+</tr>
+<tr class="odd">
+<td align="left">Q</td>
+<td align="left">CAA</td>
+<td align="right">10334</td>
+<td align="right">0.132688</td>
+</tr>
+<tr class="even">
+<td align="left">Q</td>
+<td align="left">CAG</td>
+<td align="right">67548</td>
+<td align="right">0.867312</td>
+</tr>
+<tr class="odd">
+<td align="left">R</td>
+<td align="left">AGA</td>
+<td align="right">1278</td>
+<td align="right">0.009559</td>
+</tr>
+<tr class="even">
+<td align="left">R</td>
+<td align="left">AGG</td>
+<td align="right">5084</td>
+<td align="right">0.038025</td>
+</tr>
+<tr class="odd">
+<td align="left">R</td>
+<td align="left">CGA</td>
+<td align="right">6501</td>
+<td align="right">0.048623</td>
+</tr>
+<tr class="even">
+<td align="left">R</td>
+<td align="left">CGC</td>
+<td align="right">77526</td>
+<td align="right">0.579846</td>
+</tr>
+<tr class="odd">
+<td align="left">R</td>
+<td align="left">CGG</td>
+<td align="right">26104</td>
+<td align="right">0.195242</td>
+</tr>
+<tr class="even">
+<td align="left">R</td>
+<td align="left">CGT</td>
+<td align="right">17208</td>
+<td align="right">0.128705</td>
+</tr>
+<tr class="odd">
+<td align="left">S</td>
+<td align="left">AGC</td>
+<td align="right">42618</td>
+<td align="right">0.424119</td>
+</tr>
+<tr class="even">
+<td align="left">S</td>
+<td align="left">AGT</td>
+<td align="right">5635</td>
+<td align="right">0.056077</td>
+</tr>
+<tr class="odd">
+<td align="left">S</td>
+<td align="left">TCA</td>
+<td align="right">2417</td>
+<td align="right">0.024053</td>
+</tr>
+<tr class="even">
+<td align="left">S</td>
+<td align="left">TCC</td>
+<td align="right">29967</td>
+<td align="right">0.298221</td>
+</tr>
+<tr class="odd">
+<td align="left">S</td>
+<td align="left">TCG</td>
+<td align="right">17461</td>
+<td align="right">0.173765</td>
+</tr>
+<tr class="even">
+<td align="left">S</td>
+<td align="left">TCT</td>
+<td align="right">2388</td>
+<td align="right">0.023765</td>
+</tr>
+<tr class="odd">
+<td align="left">T</td>
+<td align="left">ACA</td>
+<td align="right">2732</td>
+<td align="right">0.032677</td>
+</tr>
+<tr class="even">
+<td align="left">T</td>
+<td align="left">ACC</td>
+<td align="right">63839</td>
+<td align="right">0.763579</td>
+</tr>
+<tr class="odd">
+<td align="left">T</td>
+<td align="left">ACG</td>
+<td align="right">12982</td>
+<td align="right">0.155278</td>
+</tr>
+<tr class="even">
+<td align="left">T</td>
+<td align="left">ACT</td>
+<td align="right">4052</td>
+<td align="right">0.048466</td>
+</tr>
+<tr class="odd">
+<td align="left">V</td>
+<td align="left">GTA</td>
+<td align="right">6216</td>
+<td align="right">0.047847</td>
+</tr>
+<tr class="even">
+<td align="left">V</td>
+<td align="left">GTC</td>
+<td align="right">44530</td>
+<td align="right">0.342768</td>
+</tr>
+<tr class="odd">
+<td align="left">V</td>
+<td align="left">GTG</td>
+<td align="right">71831</td>
+<td align="right">0.552916</td>
+</tr>
+<tr class="even">
+<td align="left">V</td>
+<td align="left">GTT</td>
+<td align="right">7336</td>
+<td align="right">0.056469</td>
+</tr>
+<tr class="odd">
+<td align="left">W</td>
+<td align="left">TGG</td>
+<td align="right">26575</td>
+<td align="right">1.000000</td>
+</tr>
+<tr class="even">
+<td align="left">Y</td>
+<td align="left">TAC</td>
+<td align="right">36563</td>
+<td align="right">0.811844</td>
+</tr>
+<tr class="odd">
+<td align="left">Y</td>
+<td align="left">TAT</td>
+<td align="right">8474</td>
+<td align="right">0.188156</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>#extract the stop codon form annotation data
+csv &lt;- read.csv(&quot;merged_document_annotations.csv&quot;, stringsAsFactors= FALSE)
+Sequence &lt;- csv %&gt;%
+  select(locus_tag, Sequence) %&gt;%
+  arrange(locus_tag)
+rownames(Sequence) &lt;- Sequence[,1]
+Sequence &lt;- Sequence[,-1]
+#extract the last 3 charater from each CDS DNA sequence
+library(stringr)
+stopcodon &lt;- str_sub(Sequence, start= -3)
+#calculate the 3 stop codon total number and make the stop codon usage table
+stop_codon&lt;- as.data.frame(table(stopcodon))
+stop_codno_f&lt;- stop_codon %&gt;%
+  mutate(Aminoacids= c(&quot;*&quot;,&quot;*&quot;,&quot;*&quot;)) %&gt;%
+  group_by(Aminoacids) %&gt;%
+  mutate(freq = round(Freq/sum(Freq), 6)) %&gt;%
+  rename(Aminoacids= Aminoacids,CODONS= stopcodon, Sum=Freq, freq=freq) %&gt;%
+  mutate(CODONS = as.character(CODONS))%&gt;%
+  select(Aminoacids, CODONS, Sum, freq)
+#merge two codon usage table to 64 codon usage table, then output the final result
+codon_usage_f&lt;-bind_rows(codon_usage, stop_codno_f)
+codon_usage_f</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Aminoacids</th>
+<th align="left">CODONS</th>
+<th align="right">Sum</th>
+<th align="right">freq</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">A</td>
+<td align="left">GCA</td>
+<td align="right">11150</td>
+<td align="right">0.053200</td>
+</tr>
+<tr class="even">
+<td align="left">A</td>
+<td align="left">GCC</td>
+<td align="right">134339</td>
+<td align="right">0.640970</td>
+</tr>
+<tr class="odd">
+<td align="left">A</td>
+<td align="left">GCG</td>
+<td align="right">53336</td>
+<td align="right">0.254481</td>
+</tr>
+<tr class="even">
+<td align="left">A</td>
+<td align="left">GCT</td>
+<td align="right">10762</td>
+<td align="right">0.051349</td>
+</tr>
+<tr class="odd">
+<td align="left">C</td>
+<td align="left">TGC</td>
+<td align="right">16541</td>
+<td align="right">0.886394</td>
+</tr>
+<tr class="even">
+<td align="left">C</td>
+<td align="left">TGT</td>
+<td align="right">2120</td>
+<td align="right">0.113606</td>
+</tr>
+<tr class="odd">
+<td align="left">D</td>
+<td align="left">GAC</td>
+<td align="right">76359</td>
+<td align="right">0.754424</td>
+</tr>
+<tr class="even">
+<td align="left">D</td>
+<td align="left">GAT</td>
+<td align="right">24856</td>
+<td align="right">0.245576</td>
+</tr>
+<tr class="odd">
+<td align="left">E</td>
+<td align="left">GAA</td>
+<td align="right">40076</td>
+<td align="right">0.357458</td>
+</tr>
+<tr class="even">
+<td align="left">E</td>
+<td align="left">GAG</td>
+<td align="right">72038</td>
+<td align="right">0.642542</td>
+</tr>
+<tr class="odd">
+<td align="left">F</td>
+<td align="left">TTC</td>
+<td align="right">61663</td>
+<td align="right">0.923085</td>
+</tr>
+<tr class="even">
+<td align="left">F</td>
+<td align="left">TTT</td>
+<td align="right">5138</td>
+<td align="right">0.076915</td>
+</tr>
+<tr class="odd">
+<td align="left">G</td>
+<td align="left">GGA</td>
+<td align="right">8226</td>
+<td align="right">0.053645</td>
+</tr>
+<tr class="even">
+<td align="left">G</td>
+<td align="left">GGC</td>
+<td align="right">105942</td>
+<td align="right">0.690887</td>
+</tr>
+<tr class="odd">
+<td align="left">G</td>
+<td align="left">GGG</td>
+<td align="right">19797</td>
+<td align="right">0.129104</td>
+</tr>
+<tr class="even">
+<td align="left">G</td>
+<td align="left">GGT</td>
+<td align="right">19377</td>
+<td align="right">0.126365</td>
+</tr>
+<tr class="odd">
+<td align="left">H</td>
+<td align="left">CAC</td>
+<td align="right">29128</td>
+<td align="right">0.706562</td>
+</tr>
+<tr class="even">
+<td align="left">H</td>
+<td align="left">CAT</td>
+<td align="right">12097</td>
+<td align="right">0.293438</td>
+</tr>
+<tr class="odd">
+<td align="left">I</td>
+<td align="left">ATA</td>
+<td align="right">2073</td>
+<td align="right">0.025349</td>
+</tr>
+<tr class="even">
+<td align="left">I</td>
+<td align="left">ATC</td>
+<td align="right">71723</td>
+<td align="right">0.877045</td>
+</tr>
+<tr class="odd">
+<td align="left">I</td>
+<td align="left">ATT</td>
+<td align="right">7982</td>
+<td align="right">0.097606</td>
+</tr>
+<tr class="even">
+<td align="left">K</td>
+<td align="left">AAA</td>
+<td align="right">8347</td>
+<td align="right">0.147656</td>
+</tr>
+<tr class="odd">
+<td align="left">K</td>
+<td align="left">AAG</td>
+<td align="right">48183</td>
+<td align="right">0.852344</td>
+</tr>
+<tr class="even">
+<td align="left">L</td>
+<td align="left">CTA</td>
+<td align="right">2206</td>
+<td align="right">0.009938</td>
+</tr>
+<tr class="odd">
+<td align="left">L</td>
+<td align="left">CTC</td>
+<td align="right">48181</td>
+<td align="right">0.217056</td>
+</tr>
+<tr class="even">
+<td align="left">L</td>
+<td align="left">CTG</td>
+<td align="right">149156</td>
+<td align="right">0.671950</td>
+</tr>
+<tr class="odd">
+<td align="left">L</td>
+<td align="left">CTT</td>
+<td align="right">8030</td>
+<td align="right">0.036175</td>
+</tr>
+<tr class="even">
+<td align="left">L</td>
+<td align="left">TTA</td>
+<td align="right">791</td>
+<td align="right">0.003563</td>
+</tr>
+<tr class="odd">
+<td align="left">L</td>
+<td align="left">TTG</td>
+<td align="right">13611</td>
+<td align="right">0.061318</td>
+</tr>
+<tr class="even">
+<td align="left">M</td>
+<td align="left">ATG</td>
+<td align="right">39957</td>
+<td align="right">1.000000</td>
+</tr>
+<tr class="odd">
+<td align="left">N</td>
+<td align="left">AAC</td>
+<td align="right">41567</td>
+<td align="right">0.825627</td>
+</tr>
+<tr class="even">
+<td align="left">N</td>
+<td align="left">AAT</td>
+<td align="right">8779</td>
+<td align="right">0.174373</td>
+</tr>
+<tr class="odd">
+<td align="left">P</td>
+<td align="left">CCA</td>
+<td align="right">4874</td>
+<td align="right">0.052496</td>
+</tr>
+<tr class="even">
+<td align="left">P</td>
+<td align="left">CCC</td>
+<td align="right">38286</td>
+<td align="right">0.412365</td>
+</tr>
+<tr class="odd">
+<td align="left">P</td>
+<td align="left">CCG</td>
+<td align="right">43989</td>
+<td align="right">0.473790</td>
+</tr>
+<tr class="even">
+<td align="left">P</td>
+<td align="left">CCT</td>
+<td align="right">5696</td>
+<td align="right">0.061350</td>
+</tr>
+<tr class="odd">
+<td align="left">Q</td>
+<td align="left">CAA</td>
+<td align="right">10334</td>
+<td align="right">0.132688</td>
+</tr>
+<tr class="even">
+<td align="left">Q</td>
+<td align="left">CAG</td>
+<td align="right">67548</td>
+<td align="right">0.867312</td>
+</tr>
+<tr class="odd">
+<td align="left">R</td>
+<td align="left">AGA</td>
+<td align="right">1278</td>
+<td align="right">0.009559</td>
+</tr>
+<tr class="even">
+<td align="left">R</td>
+<td align="left">AGG</td>
+<td align="right">5084</td>
+<td align="right">0.038025</td>
+</tr>
+<tr class="odd">
+<td align="left">R</td>
+<td align="left">CGA</td>
+<td align="right">6501</td>
+<td align="right">0.048623</td>
+</tr>
+<tr class="even">
+<td align="left">R</td>
+<td align="left">CGC</td>
+<td align="right">77526</td>
+<td align="right">0.579846</td>
+</tr>
+<tr class="odd">
+<td align="left">R</td>
+<td align="left">CGG</td>
+<td align="right">26104</td>
+<td align="right">0.195242</td>
+</tr>
+<tr class="even">
+<td align="left">R</td>
+<td align="left">CGT</td>
+<td align="right">17208</td>
+<td align="right">0.128705</td>
+</tr>
+<tr class="odd">
+<td align="left">S</td>
+<td align="left">AGC</td>
+<td align="right">42618</td>
+<td align="right">0.424119</td>
+</tr>
+<tr class="even">
+<td align="left">S</td>
+<td align="left">AGT</td>
+<td align="right">5635</td>
+<td align="right">0.056077</td>
+</tr>
+<tr class="odd">
+<td align="left">S</td>
+<td align="left">TCA</td>
+<td align="right">2417</td>
+<td align="right">0.024053</td>
+</tr>
+<tr class="even">
+<td align="left">S</td>
+<td align="left">TCC</td>
+<td align="right">29967</td>
+<td align="right">0.298221</td>
+</tr>
+<tr class="odd">
+<td align="left">S</td>
+<td align="left">TCG</td>
+<td align="right">17461</td>
+<td align="right">0.173765</td>
+</tr>
+<tr class="even">
+<td align="left">S</td>
+<td align="left">TCT</td>
+<td align="right">2388</td>
+<td align="right">0.023765</td>
+</tr>
+<tr class="odd">
+<td align="left">T</td>
+<td align="left">ACA</td>
+<td align="right">2732</td>
+<td align="right">0.032677</td>
+</tr>
+<tr class="even">
+<td align="left">T</td>
+<td align="left">ACC</td>
+<td align="right">63839</td>
+<td align="right">0.763579</td>
+</tr>
+<tr class="odd">
+<td align="left">T</td>
+<td align="left">ACG</td>
+<td align="right">12982</td>
+<td align="right">0.155278</td>
+</tr>
+<tr class="even">
+<td align="left">T</td>
+<td align="left">ACT</td>
+<td align="right">4052</td>
+<td align="right">0.048466</td>
+</tr>
+<tr class="odd">
+<td align="left">V</td>
+<td align="left">GTA</td>
+<td align="right">6216</td>
+<td align="right">0.047847</td>
+</tr>
+<tr class="even">
+<td align="left">V</td>
+<td align="left">GTC</td>
+<td align="right">44530</td>
+<td align="right">0.342768</td>
+</tr>
+<tr class="odd">
+<td align="left">V</td>
+<td align="left">GTG</td>
+<td align="right">71831</td>
+<td align="right">0.552916</td>
+</tr>
+<tr class="even">
+<td align="left">V</td>
+<td align="left">GTT</td>
+<td align="right">7336</td>
+<td align="right">0.056469</td>
+</tr>
+<tr class="odd">
+<td align="left">W</td>
+<td align="left">TGG</td>
+<td align="right">26575</td>
+<td align="right">1.000000</td>
+</tr>
+<tr class="even">
+<td align="left">Y</td>
+<td align="left">TAC</td>
+<td align="right">36563</td>
+<td align="right">0.811844</td>
+</tr>
+<tr class="odd">
+<td align="left">Y</td>
+<td align="left">TAT</td>
+<td align="right">8474</td>
+<td align="right">0.188156</td>
+</tr>
+<tr class="even">
+<td align="left">*</td>
+<td align="left">TAA</td>
+<td align="right">825</td>
+<td align="right">0.138330</td>
+</tr>
+<tr class="odd">
+<td align="left">*</td>
+<td align="left">TAG</td>
+<td align="right">812</td>
+<td align="right">0.136150</td>
+</tr>
+<tr class="even">
+<td align="left">*</td>
+<td align="left">TGA</td>
+<td align="right">4327</td>
+<td align="right">0.725520</td>
+</tr>
+</tbody>
+</table>
+</div>
